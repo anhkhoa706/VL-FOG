@@ -1,26 +1,16 @@
-# VL-FOG: Vision–Language Flow Gating Framework for Early Accident Anticipation - [TAISC 2025](https://sites.google.com/view/avss2025-tw/taisc)
-
-This repository contains the main training pipeline for the **VL-FOG** model, designed for the TAISC (Taiwan Accident Classification) Challenge. The model predicts imminent traffic accidents from dash-cam video using a vision-language approach with vehicle detection via YOLO.
+# Training Guide for VL-FOG: Vision–Language Flow Gating Framework for Early Accident Anticipation - [TAISC 2025](https://sites.google.com/view/avss2025-tw/taisc)
 
 
+## 📊 Performance
 
-| #   | Participant | Entries | Date              | Score   | Accuracy | F1 Score | AUC  |
-|-----|-------------|---------|-------------------|---------|----------|----------|------|
-| 🥇  | **kane110 (Our team)** | **1**     | **2025-07-11 02:25**  | **0.67** | **0.70**     | **0.63**     | **0.73** |
-| 🥈  | qyming      | 1       | 2025-07-12 22:43  | **0.66** | 0.72     | 0.60     | 0.71 |
-| 🥉  | hsu_lab     | 1       | 2025-07-13 06:49  | **0.65** | 0.69     | 0.60     | 0.71 |
+|              | accuracy | f1 score | AUC    | Score  |
+|--------------|----------|----------|--------|--------|
+| Training  | 0.7746   | 0.7573   | 0.7790 | 0.7668 |
+| Private test | 0.6992   | 0.6262   | 0.7314 | 0.6691 |
 
 
-## Table of Contents
 
-| Guide            | Description                                  |
-|------------------|----------------------------------------------|
-| Test Guide | Generate Submission File (see below)         |
-| [Training Guide](training_guide.md)                | Full training instructions (external guide)  |
-
----
-
-## 🚀 Quick Start for Make Submission File
+## 🚀 Quick Start & Workflow for Training
 
 ### 1. **Install Dependencies**
 
@@ -31,7 +21,6 @@ pip install -r requirements.txt
 ### 2. **Prepare Data**
 
 - Place your training CSVs and frame folders as specified in your `config/training_config_stepLR.yaml` ([see project structure](#project-structure)).
-
 ```
 data/AVA_Dataset/
 ├── freeway_train.csv
@@ -43,7 +32,7 @@ data/AVA_Dataset/
 ### 3. **Download YOLO Weights**
 - Download the [YOLO Weights](https://drive.google.com/file/d/1wC4Wxtlg7bv4W7gbrsHd2lcYh59Ow9me/view?usp=sharing) (e.g., `yolo11x_trained.pt`).
 
-Or run command
+Or run command:
 ```bash
 gdown 1wC4Wxtlg7bv4W7gbrsHd2lcYh59Ow9me
 ```
@@ -57,16 +46,44 @@ gdown 1wC4Wxtlg7bv4W7gbrsHd2lcYh59Ow9me
 
 - Run the bounding box extraction script for the desired split:
   ```bash
-  python utils/extract_bb.py --split test  # For testing - generate submission file
+  python utils/extract_bb.py --split train # For training
   ```
 - This will use YOLO to detect vehicles in all frames and cache the results.
-- **Bounding boxes are saved as compressed pickle files** in `.bb_cache` folders inside each video directory (e.g., `data/AVA_Dataset/freeway/test/.bb_cache/`).
+- **Bounding boxes are saved as compressed pickle files** in `.bb_cache` folders inside each video directory (e.g., `data/AVA_Dataset/freeway/train/.bb_cache/`).
 - You only need to run this step once per dataset (unless you change the frames or YOLO weights).
 
-### 5. **Edit Config** & **Generate Prediction File**
+### 5. **Train the Model**:
+
+**Note:** Training on different devices may yield different results, even with the same configuration. Additionally, the results are also affected by the object detection performance from YOLO. The results presented here were obtained under optimal conditions during our best training runs.
+
+- You can use the provided shell script for training:
+  ```bash
+  chmod +x train.sh
+  ```
+  ```bash
+  ./train.sh
+  ```
+- Or run manually:
+  ```bash
+  python main.py --config config/training_config_stepLR.yaml
+  ```
+
+Training logs, best model, and TensorBoard logs will be saved in a new `runs/YYYYMMDD_HHMMSS/` directory (the latest directory).
+
+### 6. **Monitor Training**
+
+- Use the provided script to launch TensorBoard:
+  ```bash
+  python launch_board.py
+  ```
+- This will automatically find the latest run and open TensorBoard at the correct log directory.
+- You can also specify a custom log directory with `--runs_dir`.
+
+### 7. **Evaluate/Test & Generate Prediction File**
 
 - **Model Weight:** Download the pretrained model [here](https://drive.google.com/file/d/1mfk1D4iDenlneQmqPAYGWWmit6xO8xKs/view?usp=sharing) and place it at the path specified in your config (e.g., `models/best_model.pth`).  
 
+Or run command:
 ```bash
 gdown 1mfk1D4iDenlneQmqPAYGWWmit6xO8xKs
 ```
@@ -78,15 +95,19 @@ gdown 1mfk1D4iDenlneQmqPAYGWWmit6xO8xKs
       freeway: data/AVA_Dataset/freeway/test
       road: data/AVA_Dataset/road/test
     output_csv: "results/test_predictions.csv"
-  ```- Then run:
+    ...
+  ```
+- Then run:
   ```bash
   python test.py
   ```
 - The prediction file will be saved to the path specified in your config.
 
+## 🖥️ Device Used for Training
 
-## **Note** 
-Training on different devices may yield different results, even with the same configuration. Additionally, the results are also affected by the object detection performance from YOLO. The results presented here were obtained under optimal conditions during our best training runs.
+All experiments and benchmarks in this project were conducted on:
+
+- **GPU:** NVIDIA RTX A6000 (49GB VRAM)
 
 
 ## 🧪 Data Splitting: train_df.csv and val_df.csv
@@ -96,7 +117,7 @@ After extensive experiments with **k-fold cross-validation (k=5)**, we found tha
 - `data/train_df.csv`: CSV listing the best training set (file_name, risk, etc.)
 - `data/val_df.csv`: CSV listing the best validation set
 
-If you want to reproduce the better results, use these files for training and validation.
+If you want to reproduce the best results, use these files for training and validation.
 
 ---
 
@@ -155,6 +176,40 @@ TAISC-Challenge/
 
 </details>
 
+<details>
+<summary>Script Overview</summary>
+
+### main.py
+- Loads config and sets up directories, logging, and TensorBoard
+- Initializes model, optimizer, loss, scheduler, and data loaders
+- Runs the training loop with early stopping and best model saving
+- Logs all progress and metrics
+- Supports custom config via `--config` argument
+
+### test.py
+- Loads the best model and runs inference on the test set
+- Saves predictions to CSV
+
+### utils/extract_bb.py
+- Uses YOLO to detect vehicles in video frames
+- Caches bounding box data for efficient processing
+- Supports multiprocessing for faster extraction
+- **Bounding boxes are saved in `.bb_cache` folders inside each video directory.**
+
+### utils/optical_flow.py
+- Computes optical flow features using detected vehicle bounding boxes
+- Implements caching for performance optimization
+- Provides both basic and bounding box-aware flow extraction
+
+### launch_board.py
+- Use this script to launch TensorBoard for the latest run or a custom log directory.
+- Example:
+  ```bash
+  python launch_board.py --latest
+  ```
+
+</details>
+
 ---
 
 ## 🔗 References
@@ -163,13 +218,7 @@ TAISC-Challenge/
 - [CLIP Model](https://github.com/openai/CLIP)
 - [TAISC 2025](https://sites.google.com/view/avss2025-tw/taisc)
 
----
 
 ## 📜 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-
-
-
-

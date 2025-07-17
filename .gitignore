@@ -1,0 +1,11 @@
+*AVA_Dataset
+*AVA_Depth
+*.pt
+*.csv
+*__pycache__
+*runs
+*checkpoints
+*simulation
+*snapshots
+*test_data
+*.out

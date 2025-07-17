@@ -1,0 +1,64 @@
+# Training message
+training_message: "Training Simplified CLIPFusionNet with splited datasets using StepLR scheduler"
+
+# Dataset configuration
+dataset:
+  csv_path:
+    freeway: data/AVA_Dataset/freeway_train.csv
+    road: data/AVA_Dataset/road_train.csv
+  frame_root: 
+    freeway: data/AVA_Dataset/freeway/train
+    road: data/AVA_Dataset/road/train
+  prompts:
+    - "A crash is about to happen"
+    - "This is a safe driving scene"
+  batch_size: 4
+  num_workers: 4
+  max_frames: 32
+  flow_bins: 32
+  train_split: 0.8
+
+# Model configuration
+model:
+  version: simplified
+  hidden_dim: 256
+  dropout: 0.3
+
+# CLIP model configuration
+clip:
+  model: openai/clip-vit-base-patch32
+  freeze_clip: true
+  local_path: null
+  pretrained_path: null
+
+# Training configuration
+training:
+  epochs: 30
+  lr: 0.0007
+  device: cuda:1
+  patience: 15
+  
+  # Learning rate scheduler - StepLR configuration
+  scheduler:
+    type: step
+    step_size: 8       # 🔧 LR decay every 8 epochs
+    gamma: 0.7       # 🔧 Multiply LR by 0.7 each step (was called 'factor')
+  
+  # Class weighting
+  class_weights: [0.4, 0.6]
+  
+  # Label smoothing
+  label_smoothing: 0.1
+  
+  # TensorBoard logging
+  use_tensorboard: true
+
+# Test configuration
+test:
+  model_path: "best_model.pth"
+  frame_root: 
+    freeway: data/AVA_Dataset/freeway/test
+    road: data/AVA_Dataset/road/test
+  output_csv: "results/test_predictions.csv"
+
+output_dir: data

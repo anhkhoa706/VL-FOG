@@ -1,0 +1,1 @@
+nohup python main.py --config config/training_config_stepLR.yaml
