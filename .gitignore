@@ -9,3 +9,4 @@
 *snapshots
 *test_data
 *.out
+*.pt

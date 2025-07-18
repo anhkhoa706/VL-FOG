@@ -65,7 +65,7 @@ gdown 1wC4Wxtlg7bv4W7gbrsHd2lcYh59Ow9me
 
 ### 5. **Edit Config** & **Generate Prediction File**
 
-- **Model Weight:** Download the pretrained model [here](https://drive.google.com/file/d/1mfk1D4iDenlneQmqPAYGWWmit6xO8xKs/view?usp=sharing) and place it at the path specified in your config (e.g., `models/best_model.pth`).  
+- **Model Weight:** Download the [Pretrained Model](https://drive.google.com/file/d/1mfk1D4iDenlneQmqPAYGWWmit6xO8xKs/view?usp=sharing) and place it at the path specified in your config (e.g., `models/best_model.pth`).  
 
 ```bash
 gdown 1mfk1D4iDenlneQmqPAYGWWmit6xO8xKs
