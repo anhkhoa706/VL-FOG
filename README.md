@@ -29,7 +29,7 @@ pip install -r requirements.txt
 ```
 
 ### 2. **Prepare Data**
-
+- Download the [offical AVA dataset](https://drive.google.com/file/d/1F1Vaat_ZrpITtDtlo4WB5cwUHEfMYon2/view)
 - Place your training CSVs and frame folders as specified in your `config/training_config_stepLR.yaml` ([see project structure](#project-structure)).
 
 ```

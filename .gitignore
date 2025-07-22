@@ -1,7 +1,5 @@
 *AVA_Dataset
-*AVA_Depth
-*.pt
-*.csv
+*.pth
 *__pycache__
 *runs
 *checkpoints
